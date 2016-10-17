@@ -3,6 +3,7 @@ import ObjectParser from './ObjectParser'
 import ArrayParser from './ArrayParser'
 import NumberParser from './NumberParser'
 import DateParser from './DateParser'
+import DateTimeParser from './DateTimeParser'
 import BooleanParser from './BooleanParser'
 import AllOfParser from './AllOfParser'
 import EnumParser from './EnumParser'
@@ -12,6 +13,8 @@ const chance = new Chance();
 export default class Parser {
     get parsers() {
         return this._parsers || (this._parsers = [
+            new DateParser(),
+            new DateTimeParser(),
             new EnumParser(),
             new StringParser(),
             new ObjectParser(this),
@@ -19,7 +22,6 @@ export default class Parser {
             new AllOfParser(this),
             new NumberParser(),
             new BooleanParser(),
-            new DateParser(),
             new BooleanParser(),
         ]);
     }
@@ -38,8 +40,21 @@ export default class Parser {
             return node['x-type-value'];
         }
 
-        if (node['x-chance-type'])
-            return chance[node['x-chance-type']](node['x-type-options']);
+        if (node['x-chance-type']) {
+            let fn = node['x-chance-type'].split('.');
+            let value = chance[fn[0]](node['x-type-options']);
+
+            if (fn[1]) {
+              value = value[fn[1]];
+            }
+
+            // force string type
+            if (node['type'] === 'string') {
+              value = `${value}`;
+            }
+
+            return value;
+        }
 
         return this.getParser(node).parse(node);
     }

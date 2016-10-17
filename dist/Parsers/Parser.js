@@ -30,6 +30,10 @@ var _DateParser = require('./DateParser');
 
 var _DateParser2 = _interopRequireDefault(_DateParser);
 
+var _DateTimeParser = require('./DateTimeParser');
+
+var _DateTimeParser2 = _interopRequireDefault(_DateTimeParser);
+
 var _BooleanParser = require('./BooleanParser');
 
 var _BooleanParser2 = _interopRequireDefault(_BooleanParser);
@@ -71,14 +75,28 @@ var Parser = (function () {
                 return node['x-type-value'];
             }
 
-            if (node['x-chance-type']) return chance[node['x-chance-type']](node['x-type-options']);
+            if (node['x-chance-type']) {
+                var fn = node['x-chance-type'].split('.');
+                var value = chance[fn[0]](node['x-type-options']);
+
+                if (fn[1]) {
+                    value = value[fn[1]];
+                }
+
+                // force string type
+                if (node['type'] === 'string') {
+                    value = '' + value;
+                }
+
+                return value;
+            }
 
             return this.getParser(node).parse(node);
         }
     }, {
         key: 'parsers',
         get: function get() {
-            return this._parsers || (this._parsers = [new _EnumParser2['default'](), new _StringParser2['default'](), new _ObjectParser2['default'](this), new _ArrayParser2['default'](this), new _AllOfParser2['default'](this), new _NumberParser2['default'](), new _BooleanParser2['default'](), new _DateParser2['default'](), new _BooleanParser2['default']()]);
+            return this._parsers || (this._parsers = [new _DateParser2['default'](), new _DateTimeParser2['default'](), new _EnumParser2['default'](), new _StringParser2['default'](), new _ObjectParser2['default'](this), new _ArrayParser2['default'](this), new _AllOfParser2['default'](this), new _NumberParser2['default'](), new _BooleanParser2['default'](), new _BooleanParser2['default']()]);
         }
     }]);
 

@@ -67,12 +67,19 @@ exports['default'] = function (config) {
     }
 
     basePath = api.basePath || '';
-    router = (0, _ConfigureRouter2['default'])(api.paths);
+    router = (0, _ConfigureRouter2['default'])(api.paths, config.mock || {});
   }
 
   return function (req, res, next) {
     parserPromise.then(function () {
       var method = req.method.toLowerCase();
+
+      if (method === 'options') {
+        res.end();
+        return;
+      } else if (method === 'delete' && !res.body) {
+        res.statusCode = 204;
+      }
 
       var path = _url2['default'].parse(req.url).pathname;
       path = path.replace(basePath + '/', '');
@@ -90,8 +97,10 @@ exports['default'] = function (config) {
 
       try {
         var response = matchingRoute.fn();
+
+        res.statusCode = response && response.statusCode || 200;
         res.setHeader('Content-Type', 'application/json');
-        res.write(response !== null ? JSON.stringify(response) : '');
+        res.write(response && response.body ? JSON.stringify(response.body) : '');
       } catch (e) {
         res.statusCode = 500;
         res.write(JSON.stringify({ message: e.message }, null, 4));

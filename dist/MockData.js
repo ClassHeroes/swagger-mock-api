@@ -1,5 +1,7 @@
 'use strict';
 
+var _Object$assign = require('babel-runtime/core-js/object/assign')['default'];
+
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
 
 Object.defineProperty(exports, '__esModule', {
@@ -7,13 +9,9 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = MockData;
 
-var _chance = require('chance');
+var _stripJsonComments = require('strip-json-comments');
 
-var _chance2 = _interopRequireDefault(_chance);
-
-var _hoek = require('hoek');
-
-var _hoek2 = _interopRequireDefault(_hoek);
+var _stripJsonComments2 = _interopRequireDefault(_stripJsonComments);
 
 var _ParsersParser = require('./Parsers/Parser');
 
@@ -21,12 +19,27 @@ var _ParsersParser2 = _interopRequireDefault(_ParsersParser);
 
 var parser = new _ParsersParser2['default']();
 
-function MockData(definition) {
+function MockData(definition, configMock) {
   var schema = definition.schema;
 
   if (!schema) return null;
 
-  return parser.parse(schema);
+  var mock = null;
+
+  if (configMock.useExamples) {
+    if (configMock.useExamples && typeof definition.examples === 'object') {
+      mock = definition.examples;
+      if (configMock.extendExamples) {
+        mock = _Object$assign(parser.parse(schema), mock);
+      }
+    }
+  }
+
+  if (!mock) {
+    mock = parser.parse(schema);
+  }
+
+  return mock;
 }
 
 ;

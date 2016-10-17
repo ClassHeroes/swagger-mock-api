@@ -1,14 +1,30 @@
 'use strict';
 
-import Chance from 'chance';
-import hoek from 'hoek';
+import stripJsonComments from 'strip-json-comments';
+
 import Parser from './Parsers/Parser'
+
 let parser = new Parser();
 
-export default function MockData(definition) {
+export default function MockData(definition, configMock) {
   let schema = definition.schema;
 
   if (!schema) return null;
 
-  return parser.parse(schema);
+  let mock = null;
+
+  if (configMock.useExamples) {
+    if (configMock.useExamples && typeof(definition.examples) === 'object') {
+      mock = definition.examples;
+      if (configMock.extendExamples) {
+        mock = Object.assign(parser.parse(schema), mock);
+      }
+    }
+  }
+
+  if (!mock) {
+    mock = parser.parse(schema);
+  }
+
+  return mock;
 };
