@@ -133,3 +133,12 @@ Although not a chance method, support has been added for returning fixed values 
       x-type-value:
         type: 'adopted'
 ```
+
+# Tool
+
+```sh
+# publish package
+$> npm config set registry https://npm.fury.io/classheroes/ --scope=@classheroes
+$> npm login --scope=@classheroes
+$> npm publish --access restricted
+```
